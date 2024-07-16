@@ -3,11 +3,18 @@ var canvas, ctx, scoreDiv, maxScoreDiv;
 window.onload = function () {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-    scoreDiv = document.querySelector(".score"); // Get the score div
-    maxScoreDiv = document.querySelector(".max-score"); // Get the max score div
+    scoreDiv = document.querySelector(".score");
+    maxScoreDiv = document.querySelector(".max-score");
     document.addEventListener("keydown", keyDownFn);
-    var fps = 10; // Reduced frame rate to slow down the snake
-    setInterval(draw, 1000 / fps); // Use fps to control the speed
+
+    if (window.DeviceOrientationEvent) {
+        // Check if the device supports DeviceOrientationEvent
+        window.addEventListener("deviceorientation", handleOrientation, true);
+    } else {
+        alert("Device orientation not supported on this device.");
+    }
+
+    setInterval(draw, 100); // Use fps to control the speed
 }
 
 var gridSize = 20; // Number of tiles in the grid (both width and height)
@@ -131,6 +138,39 @@ function keyDownFn(e) {
                 nextY = 1;
             }
             break;
+    }
+}
+
+function handleOrientation(event) {
+    var x = event.gamma; // In degree in the range [-90,90]
+    var y = event.beta; // In degree in the range [-180,180]
+
+    if (Math.abs(x) > Math.abs(y)) {
+        // Left or Right tilt
+        if (x > 10) {
+            if (nextX !== -1) {
+                nextX = 1;
+                nextY = 0;
+            }
+        } else if (x < -10) {
+            if (nextX !== 1) {
+                nextX = -1;
+                nextY = 0;
+            }
+        }
+    } else {
+        // Up or Down tilt
+        if (y > 10) {
+            if (nextY !== -1) {
+                nextX = 0;
+                nextY = 1;
+            }
+        } else if (y < -10) {
+            if (nextY !== 1) {
+                nextX = 0;
+                nextY = -1;
+            }
+        }
     }
 }
 
